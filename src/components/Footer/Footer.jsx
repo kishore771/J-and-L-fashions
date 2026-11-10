@@ -1,4 +1,5 @@
 import TransparentLogo from '../../assets/logos/Transparent-logo.png';
+import { Link } from 'react-router';
 import './Footer.css';
 
 const Footer = () => {
@@ -25,10 +26,10 @@ const Footer = () => {
         <div className="footer-links">
           <h3>Quick Links</h3>
           <ul>
-  <li><a href="/">Home</a></li>
-  <li><a href="/men">Men</a></li>
-  <li><a href="/women">Women</a></li>
-  <li><a href="/collections">Collections</a></li>
+  <li><Link to="/">Home</Link></li>
+  <li><Link to="/men">Men</Link></li>
+  <li><Link to="/women">Women</Link></li>
+  <li><Link to="/collections">Collections</Link></li>
 </ul>
         </div>
 
@@ -36,8 +37,8 @@ const Footer = () => {
         <div className="footer-service">
           <h3>Customer Service</h3>
           <ul>
-  <li><a href="/about">About Us</a></li>
-  <li><a href="/contact">Contact Us</a></li>
+  <li><Link to="/about">About Us</Link></li>
+  <li><Link to="/contact">Contact Us</Link></li>
 </ul>
         </div>
 
