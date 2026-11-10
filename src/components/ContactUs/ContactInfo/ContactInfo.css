@@ -1,0 +1,116 @@
+
+/* =========================
+   CONTACT INFO CONTAINER
+========================= */
+
+.contact-info-container {
+  width: 100%;
+  padding: 35px;
+  background-color: #ffffff;
+  border: 1px solid #eee8df;
+  box-sizing: border-box;
+}
+
+/* Header */
+
+.contact-info-header {
+  margin-bottom: 35px;
+}
+
+.contact-info-header h2 {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: #29251f;
+  margin: 0 0 10px;
+}
+
+.contact-info-header p {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #77716a;
+  margin: 0;
+}
+
+/* Contact Details List */
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Individual Contact Item */
+
+.contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+/* Icon */
+
+.contact-info-icon {
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #d3eef3;
+  color: #29251f;
+}
+
+.contact-info-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.6;
+}
+
+/* Contact Details */
+
+.contact-info-details h3 {
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #29251f;
+  margin: 0 0 8px;
+}
+
+.contact-info-details p {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #77716a;
+  margin: 0;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 480px) {
+  .contact-info-container {
+    padding: 25px 20px;
+  }
+
+  .contact-info-header h2 {
+    font-size: 24px;
+  }
+
+  .contact-info-list {
+    gap: 24px;
+  }
+
+  .contact-info-item {
+    gap: 14px;
+  }
+
+  .contact-info-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+}

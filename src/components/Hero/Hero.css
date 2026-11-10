@@ -1,0 +1,214 @@
+
+/* =========================
+   HERO SECTION
+========================= */
+
+.hero {
+  width: 100%;
+  min-height: 600px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  background-image: url("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=2400&q=85");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+/* =========================
+   DARK OVERLAY
+========================= */
+
+.hero-overlay {
+  width: 100%;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  padding: 60px 8%;
+  box-sizing: border-box;
+
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.35) 55%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+}
+
+/* =========================
+   HERO CONTENT
+========================= */
+
+.hero-content {
+  width: 100%;
+  max-width: 600px;
+  color: #ffffff;
+}
+
+/* Subtitle */
+
+.hero-subtitle {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+  color: #e8dfd2;
+}
+
+/* Main Heading */
+
+.hero-title {
+  font-family: Georgia, serif;
+  font-size: 64px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin: 0 0 20px;
+  color: #ffffff;
+}
+
+/* Description */
+
+.hero-description {
+  max-width: 480px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0.3px;
+  margin: 0 0 35px;
+  color: #f1f1f1;
+}
+
+/* =========================
+   EXPLORE BUTTON
+========================= */
+
+.hero-button {
+  display: inline-block;
+  padding: 16px 36px;
+
+  background-color: #faf8f3;
+  color: #29251f;
+
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  border: 1px solid #faf8f3;
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.hero-button:hover {
+  background-color: transparent;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* =========================
+   TABLET RESPONSIVENESS
+========================= */
+
+@media (max-width: 768px) {
+  .hero,
+  .hero-overlay {
+    min-height: 500px;
+  }
+
+  .hero {
+    background-position: 60% center;
+  }
+
+  .hero-overlay {
+    padding: 40px 6%;
+  }
+
+  .hero-title {
+    font-size: 46px;
+  }
+
+  .hero-description {
+    font-size: 15px;
+    max-width: 420px;
+  }
+}
+
+/* =========================
+   MOBILE RESPONSIVENESS
+========================= */
+
+@media (max-width: 480px) {
+  .hero,
+  .hero-overlay {
+    min-height: 450px;
+  }
+
+  .hero {
+    background-position: top center;
+  }
+
+  .hero-overlay {
+    padding: 35px 6%;
+
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.72) 0%,
+      rgba(0, 0, 0, 0.48) 65%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-subtitle {
+    font-size: 11px;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .hero-description {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+  }
+
+  .hero-button {
+    padding: 14px 26px;
+    font-size: 11px;
+  }
+}
+
+/* =========================
+   SMALL MOBILE SCREENS
+========================= */
+
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 31px;
+  }
+
+  .hero-subtitle {
+    letter-spacing: 2px;
+  }
+
+  .hero-button {
+    padding: 13px 20px;
+  }
+}

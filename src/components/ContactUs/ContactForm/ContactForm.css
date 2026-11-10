@@ -1,0 +1,148 @@
+
+/* =========================
+   CONTACT FORM CONTAINER
+========================= */
+
+.contact-form-container {
+  width: 100%;
+  padding: 35px;
+  background-color: #ffffff;
+  border: 1px solid #eee8df;
+  box-sizing: border-box;
+}
+
+/* Form Header */
+
+.contact-form-header {
+  margin-bottom: 30px;
+}
+
+.contact-form-header h2 {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 500;
+  color: #29251f;
+  margin: 0 0 10px;
+}
+
+.contact-form-header p {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #77716a;
+  margin: 0;
+}
+
+/* Form Layout */
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Input Groups */
+
+.contact-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.contact-form-group label {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #29251f;
+}
+
+/* Input Fields */
+
+.contact-form-group input,
+.contact-form-group textarea {
+  width: 100%;
+  padding: 13px 15px;
+  box-sizing: border-box;
+
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #29251f;
+
+  background-color: #faf8f3;
+  border: 1px solid #ded9d0;
+  border-radius: 3px;
+  outline: none;
+
+  transition: border-color 0.3s ease,
+              background-color 0.3s ease;
+}
+
+.contact-form-group input {
+  height: 46px;
+}
+
+.contact-form-group textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.contact-form-group input:focus,
+.contact-form-group textarea:focus {
+  border-color: #a67c52;
+  background-color: #ffffff;
+}
+
+.contact-form-group input::placeholder,
+.contact-form-group textarea::placeholder {
+  color: #aaa39a;
+}
+
+/* Submit Button */
+
+.contact-form-button {
+  width: fit-content;
+  padding: 15px 32px;
+
+  background-color: #29251f;
+  color: #ffffff;
+
+  border: 1px solid #29251f;
+  cursor: pointer;
+
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  transition: background-color 0.3s ease,
+              color 0.3s ease;
+}
+
+.contact-form-button:hover {
+  background-color: transparent;
+  color: #29251f;
+}
+
+/* =========================
+   MOBILE RESPONSIVENESS
+========================= */
+
+@media (max-width: 480px) {
+  .contact-form-container {
+    padding: 25px 20px;
+  }
+
+  .contact-form-header h2 {
+    font-size: 24px;
+  }
+
+  .contact-form {
+    gap: 18px;
+  }
+
+  .contact-form-button {
+    width: 100%;
+    padding: 15px;
+  }
+}

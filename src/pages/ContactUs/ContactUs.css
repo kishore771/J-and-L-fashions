@@ -1,0 +1,116 @@
+
+/* =========================
+   CONTACT PAGE
+========================= */
+
+.contactus-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #faf8f3;
+  color: #29251f;
+  box-sizing: border-box;
+}
+
+/* =========================
+   CONTACT HEADER
+========================= */
+
+.contactus-header {
+  width: 100%;
+  padding: 80px 5%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.contactus-subtitle {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: #a67c52;
+  margin-bottom: 18px;
+}
+
+.contactus-title {
+  font-family: Georgia, serif;
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+
+.contactus-description {
+  max-width: 550px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #77716a;
+}
+
+/* =========================
+   CONTACT CONTENT
+========================= */
+
+.contactus-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 5% 80px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+
+  box-sizing: border-box;
+}
+
+/* Contact Information */
+
+.contactus-info {
+  width: 100%;
+}
+
+/* Contact Form */
+
+.contactus-form {
+  width: 100%;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 768px) {
+  .contactus-header {
+    padding: 60px 5%;
+  }
+
+  .contactus-title {
+    font-size: 38px;
+  }
+
+  .contactus-content {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    padding-bottom: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contactus-header {
+    padding: 45px 6%;
+  }
+
+  .contactus-title {
+    font-size: 32px;
+  }
+
+  .contactus-description {
+    font-size: 14px;
+  }
+
+  .contactus-content {
+    padding: 15px 6% 45px;
+  }
+}
