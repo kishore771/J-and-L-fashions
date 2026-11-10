@@ -1,4 +1,4 @@
-import constructionVideo from '../../assets/videos/under-construction.mp4';
+import constructionVideo from "../../assets/videos/Under-construction.mp4";
 import './UnderConstruction.css';
 
 const UnderConstruction = () => {
