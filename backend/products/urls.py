@@ -1,0 +1,200 @@
+from django.urls import path
+
+from .views import (
+    DepartmentListView,
+    CategoryListView,
+    SubcategoryListView,
+    AttributeListView,
+    ProductListView,
+    ProductDetailView,
+    ProductCreateView,
+    ProductUpdateView,
+    ProductVariantCreateView,
+    ProductImageCreateView,
+    ProductDeactivateView,
+    AdminTokenObtainView,
+    AdminLogoutView,
+    ProductImageUpdateView,
+    ProductImageDeleteView,
+    ProductVariantUpdateView,
+    ProductVariantDeleteView,AdminProductListView
+)
+
+from .models import (
+    Pattern,
+    Fit,
+    SleeveLength,
+    Occasion,
+    Colour,
+    Fabric,
+    Tag,
+)
+
+from .serializers import (
+    PatternSerializer,
+    FitSerializer,
+    SleeveLengthSerializer,
+    OccasionSerializer,
+    ColourSerializer,
+    FabricSerializer,
+    TagSerializer,
+)
+
+from .bulk_upload import BulkProductUploadView
+
+urlpatterns = [
+    path(
+        'departments/',
+        DepartmentListView.as_view(),
+        name='department-list'
+    ),
+    path(
+        'categories/',
+        CategoryListView.as_view(),
+        name='category-list'
+    ),
+    path(
+        'subcategories/',
+        SubcategoryListView.as_view(),
+        name='subcategory-list'
+    ),
+    path(
+    'patterns/',
+    AttributeListView.as_view(
+        model=Pattern,
+        serializer_class=PatternSerializer
+    ),
+    name='pattern-list'
+    ),
+
+    path(
+        'fits/',
+        AttributeListView.as_view(
+            model=Fit,
+            serializer_class=FitSerializer
+        ),
+        name='fit-list'
+    ),
+
+    path(
+        'sleeve-lengths/',
+        AttributeListView.as_view(
+            model=SleeveLength,
+            serializer_class=SleeveLengthSerializer
+        ),
+        name='sleeve-length-list'
+    ),
+
+    path(
+        'occasions/',
+        AttributeListView.as_view(
+            model=Occasion,
+            serializer_class=OccasionSerializer
+        ),
+        name='occasion-list'
+    ),
+
+    path(
+        'colours/',
+        AttributeListView.as_view(
+            model=Colour,
+            serializer_class=ColourSerializer
+        ),
+        name='colour-list'
+    ),
+
+    path(
+        'fabrics/',
+        AttributeListView.as_view(
+            model=Fabric,
+            serializer_class=FabricSerializer
+        ),
+        name='fabric-list'
+    ),
+
+    path(
+        'tags/',
+        AttributeListView.as_view(
+            model=Tag,
+            serializer_class=TagSerializer
+        ),
+        name='tag-list'
+    ),
+    path(
+        'products/',
+        ProductListView.as_view(),
+        name='product-list'
+    ),
+    path(
+        'products/<int:pk>/',
+        ProductDetailView.as_view(),
+        name='product-detail'
+    ),
+
+    path(
+        'admin/products/create/',
+        ProductCreateView.as_view(),
+        name='admin-product-create'
+    ),
+
+    path(
+        'admin/products/<int:pk>/update/',
+        ProductUpdateView.as_view(),
+        name='admin-product-update'
+    ),
+    path(
+        'admin/products/<int:pk>/deactivate/',
+        ProductDeactivateView.as_view(),
+        name='admin-product-deactivate'
+    ),
+    path(
+        'auth/token/',
+        AdminTokenObtainView.as_view(),
+        name='admin-token'
+    ),
+    path(
+        'auth/logout/',
+        AdminLogoutView.as_view(),
+        name='admin-logout'
+    ),
+    path(
+    'admin/products/<int:product_id>/variants/',
+    ProductVariantCreateView.as_view(),
+    name='admin-product-variant-create'
+    ),
+    path(
+        'admin/products/<int:product_id>/images/',
+        ProductImageCreateView.as_view(),
+        name='admin-product-image-create'
+    ),
+    path(
+    'admin/product-images/<int:pk>/update/',
+    ProductImageUpdateView.as_view(),
+    name='admin-product-image-update'
+    ),
+    path(
+        'admin/product-images/<int:pk>/delete/',
+        ProductImageDeleteView.as_view(),
+        name='admin-product-image-delete'
+    ),
+    path(
+        'admin/product-variants/<int:pk>/update/',
+        ProductVariantUpdateView.as_view(),
+        name='admin-product-variant-update'
+    ),
+    path(
+        'admin/product-variants/<int:pk>/delete/',
+        ProductVariantDeleteView.as_view(),
+        name='admin-product-variant-delete'
+    ),
+    path(
+        'admin/products/bulk-upload/',
+        BulkProductUploadView.as_view(),
+        name='bulk-product-upload'
+    ),
+    path(
+        'admin/products/',
+        AdminProductListView.as_view(),
+        name='admin-product-list'
+    ),
+]

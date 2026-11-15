@@ -1,0 +1,213 @@
+
+/* PAGE */
+.add-product-page {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  color: #172033;
+}
+
+.add-product-page h1 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+  margin-bottom: 8px;
+}
+
+.add-product-page > p {
+  color: #788397;
+  font-size: 14px;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* FORM SECTIONS */
+.product-form-section {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 3px 12px rgba(20, 35, 60, 0.035);
+}
+
+.product-form-section h2 {
+  font-size: 19px;
+  font-weight: 700;
+  color: #172033;
+  margin-bottom: 24px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.product-form-section h3 {
+  font-size: 16px;
+  font-weight: 650;
+  color: #33415c;
+  margin-bottom: 20px;
+}
+
+/* FORM FIELDS */
+.product-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 21px;
+}
+
+.product-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.product-form-group label {
+  font-size: 13px;
+  font-weight: 650;
+  color: #35415a;
+}
+
+.product-form-group input,
+.product-form-group select,
+.product-form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #dce1eb;
+  border-radius: 7px;
+  background: #fbfcfe;
+  color: #202b40;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.product-form-group input,
+.product-form-group select {
+  min-height: 44px;
+}
+
+.product-form-group textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.product-form-group input:focus,
+.product-form-group select:focus,
+.product-form-group textarea:focus {
+  border-color: #526dce;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(82, 109, 206, 0.12);
+}
+
+.product-form-group input::placeholder,
+.product-form-group textarea::placeholder {
+  color: #a1aabb;
+}
+
+.product-form-group select:disabled {
+  background: #f0f2f6;
+  color: #9ba3b2;
+  cursor: not-allowed;
+}
+
+.product-form-group select[multiple] {
+  min-height: 130px;
+}
+
+.product-form-group select[multiple] option {
+  padding: 7px;
+}
+
+.product-form-group small {
+  color: #8791a3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* VARIANT CARDS */
+.product-form-section .product-form-section {
+  background: #f8faff;
+  border: 1px solid #e1e7f3;
+  border-radius: 9px;
+  padding: 22px;
+  margin-bottom: 18px;
+  box-shadow: none;
+}
+
+/* FILE UPLOAD */
+.product-form-group input[type="file"] {
+  padding: 10px;
+  background: #f8faff;
+  border: 1px dashed #aebbd5;
+  cursor: pointer;
+}
+
+.product-form-group input[type="file"]::file-selector-button {
+  padding: 9px 14px;
+  margin-right: 12px;
+  border: none;
+  border-radius: 5px;
+  background: #e8edff;
+  color: #4059b3;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* BUTTONS */
+.product-form-section button {
+  padding: 10px 16px;
+  border: 1px solid #d5dced;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #4358a5;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.product-form-section button:hover {
+  background: #edf1ff;
+  border-color: #9eaddd;
+}
+
+.product-form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.product-form-actions button {
+  padding: 13px 27px;
+  border: none;
+  border-radius: 7px;
+  background: #263d80;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.product-form-actions button:hover:not(:disabled) {
+  background: #1b2e67;
+  transform: translateY(-1px);
+}
+
+.product-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ERROR */
+.form-error {
+  color: #c62828;
+  background: #fff1f1;
+  border: 1px solid #ffd7d7;
+  border-radius: 6px;
+  padding: 11px 14px;
+  font-size: 13px;
+}
