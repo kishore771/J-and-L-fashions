@@ -212,3 +212,142 @@
     padding: 13px 20px;
   }
 }
+
+/* =========================
+   HERO CAROUSEL
+========================= */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  transition: background-image 0.3s ease;
+}
+
+/* Carousel Arrows */
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+
+  cursor: pointer;
+  z-index: 5;
+
+  backdrop-filter: blur(6px);
+  transition: background 0.3s ease;
+}
+
+.hero-arrow:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.hero-arrow-left {
+  left: 20px;
+}
+
+.hero-arrow-right {
+  right: 20px;
+}
+
+/* Carousel Indicators */
+
+.hero-dots {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 5;
+}
+
+.hero-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+
+  transition:
+    background-color 0.3s ease,
+    width 0.3s ease,
+    border-radius 0.3s ease;
+}
+
+.hero-dot.active {
+  width: 26px;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 768px) {
+  .hero-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-arrow-left {
+    left: 12px;
+  }
+
+  .hero-arrow-right {
+    right: 12px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .hero-arrow {
+    width: 30px;
+    height: 30px;
+    top: auto;
+    bottom: 18px;
+    transform: none;
+  }
+
+  .hero-arrow-left {
+    left: 16px;
+  }
+
+  .hero-arrow-right {
+    right: 16px;
+  }
+
+  .hero-dots {
+    bottom: 28px;
+  }
+
+  .hero-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .hero-dot.active {
+    width: 20px;
+  }
+}

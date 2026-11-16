@@ -89,14 +89,23 @@ export const getCategories = async () => {
 };
 
 export const getSubcategories = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/subcategories/`);
+  let url = `${API_BASE_URL}/api/subcategories/`;
+  const subcategories = [];
 
-  if (!response.ok) {
-    throw new Error('Unable to fetch subcategories.');
+  while (url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Unable to fetch subcategories.');
+    }
+
+    const data = await response.json();
+
+    subcategories.push(...(data.results || data));
+    url = data.next;
   }
 
-  const data = await response.json();
-  return data.results || data;
+  return subcategories;
 };
 
 export const getPatterns = async () => {
@@ -126,15 +135,25 @@ export const getOccasions = async () => {
   const data = await response.json();
   return data.results || data;
 };
-export const getColours = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/colours/`);
 
-  if (!response.ok) {
-    throw new Error('Unable to fetch colours.');
+export const getColours = async () => {
+  let url = `${API_BASE_URL}/api/colours/`;
+  const colours = [];
+
+  while (url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Unable to fetch colours.');
+    }
+
+    const data = await response.json();
+
+    colours.push(...(data.results || data));
+    url = data.next || null;
   }
 
-  const data = await response.json();
-  return data.results || data;
+  return colours;
 };
 
 export const getTags = async () => {

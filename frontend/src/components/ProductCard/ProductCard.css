@@ -1,43 +1,143 @@
+
 .product-card {
-  width: 70%;
+  display: block;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
+  text-decoration: none;
+  color: inherit;
   cursor: pointer;
 }
 
 .product-card-image {
   width: 100%;
   aspect-ratio: 3 / 4;
-  background: #f2f0ed;
+  background-color: #f5f3f0;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-
 .product-card-image img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  transition: transform 0.4s ease;
+  transition: transform 0.35s ease;
 }
 
 .product-card:hover .product-card-image img {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .product-card-info {
-  padding: 12px 0;
+  padding: 12px 2px;
 }
 
 .product-card-info h3 {
-  font-size: 16px;
+  margin: 0 0 7px;
+  color: #29251f;
+  font-size: 14px;
   font-weight: 500;
-  margin: 0 0 6px;
-  color: #222;
+  line-height: 1.5;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .product-card-info p {
-  font-size: 15px;
-  font-weight: 600;
   margin: 0;
   color: #222;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+
+/* Discount Badge */
+.product-card-image {
+  position: relative;
+}
+
+.product-discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 5px 9px;
+  background: #b42332;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Product Prices */
+.product-card-prices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-current-price {
+  color: #222;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.product-original-price {
+  color: #999;
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+/* Missing Image */
+.product-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .product-discount-badge {
+    top: 7px;
+    left: 7px;
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  .product-current-price {
+    font-size: 14px;
+  }
+
+  .product-original-price {
+    font-size: 12px;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .product-card-image {
+    border-radius: 5px;
+  }
+
+  .product-card-info {
+    padding: 9px 1px;
+  }
+
+  .product-card-info h3 {
+    font-size: 12px;
+  }
+
+  .product-card-info p {
+    font-size: 14px;
+  }
 }

@@ -1,7 +1,9 @@
+
 .products-page {
   width: 100%;
   min-height: 80vh;
   padding: 40px 5%;
+  box-sizing: border-box;
 }
 
 .products-heading {
@@ -9,42 +11,107 @@
 }
 
 .products-heading h1 {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 600;
   color: #222;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .products-heading p {
-  font-size: 15px;
+  font-size: 14px;
   color: #777;
 }
 
+/* Product Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(5, 4fr);
-  gap: 5px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 18px;
+}
+
+/* Pagination */
+.products-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  margin-top: 40px;
+}
+
+.products-pagination button {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.products-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Tablet */
 @media (max-width: 1024px) {
   .products-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 14px;
   }
 }
 
 /* Mobile */
 @media (max-width: 600px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-  }
-
   .products-page {
-    padding: 25px 4%;
+    padding: 24px 4%;
   }
 
   .products-heading h1 {
-    font-size: 25px;
+    font-size: 24px;
   }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 10px;
+  }
+
+  .products-pagination {
+    gap: 10px;
+  }
+
+  .products-pagination button {
+    padding: 8px 12px;
+  }
+}
+
+.products-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.products-empty h2 {
+  font-size: 24px;
+  color: #29251f;
+  margin-bottom: 12px;
+}
+
+.products-empty p {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 24px;
+}
+
+.products-empty-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #29251f;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.products-empty-link:hover {
+  background-color: #a67c52;
 }

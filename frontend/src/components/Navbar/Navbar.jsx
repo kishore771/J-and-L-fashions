@@ -1,9 +1,30 @@
 import TransparentLogo from '../../assets/logos/Transparent-logo.png';
-import { UserRound, Heart, ShoppingBag } from 'lucide-react';
-import { Link } from 'react-router';
+import { UserRound, Heart, ShoppingBag, Search, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router';
 import './Navbar.css';
 
 const Navbar = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get('search') || '';
+
+    setSearchQuery(query);
+  }, [location.search, location.pathname]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    const query = searchQuery.trim();
+
+    if (!query) return;
+
+    navigate(`/collections?search=${encodeURIComponent(query)}`);
+  };
   return (
     <nav className="navbar">
         <div className="navbar-main">
@@ -12,11 +33,33 @@ const Navbar = () => {
                 <img src={TransparentLogo} className="navbar-logo-img" alt="J & L Fashions" />
             </Link>
         </div>
-        <div className="navbar-search">
-            <input type="text" placeholder="Search..." className="navbar-search-input" />
-        </div>
+
+      <form className="navbar-search" onSubmit={handleSearch}>
+        <Search size={18} className="navbar-search-icon" />
+
+        <input
+          type="search"
+          placeholder="Search products..."
+          className="navbar-search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search products"
+        />
+
+        {searchQuery && (
+          <button
+            type="button"
+            className="navbar-search-clear"
+            onClick={() => setSearchQuery('')}
+            aria-label="Clear search"
+          >
+            <X size={17} />
+          </button>
+        )}
+      </form>
+
        <div className="navbar-icons">
-  
+
 
   <Link to="/wishlist" className="navbar-icon">
     <Heart />
@@ -31,17 +74,19 @@ const Navbar = () => {
 </div>
 </div>
 
+
 <div className="navbar-navigation">
-  <Link to="/">Home</Link>
-  <Link to="/men">Men</Link>
-  <Link to="/women">Women</Link>
-  <Link to="/Kids">Kids</Link>
-  <Link to="/collections">Collections</Link>
-  <Link to="/jewellery">Jewellery</Link>
-<Link to="/accessories">Accessories</Link>
-  <Link to="/about">About</Link>
-  <Link to="/contact">Contact</Link>
+  <NavLink to="/" end>Home</NavLink>
+  <NavLink to="/men">Men</NavLink>
+  <NavLink to="/women">Women</NavLink>
+  <NavLink to="/kids">Kids</NavLink>
+  <NavLink to="/collections">Collections</NavLink>
+  <NavLink to="/jewellery">Jewellery</NavLink>
+  <NavLink to="/accessories">Accessories</NavLink>
+  <NavLink to="/about">About</NavLink>
+  <NavLink to="/contact">Contact</NavLink>
 </div>
+
     </nav>
   );
 }

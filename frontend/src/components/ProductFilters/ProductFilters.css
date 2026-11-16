@@ -1,0 +1,345 @@
+
+.product-filters-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.product-filters-panel {
+  width: min(400px, 100%);
+  height: 100%;
+  background: #fff;
+  color: #29251f;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.12);
+}
+
+.product-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.product-filters-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.product-filters-header button {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.product-filters-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px;
+}
+
+.product-filters-body section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.product-filters-body h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.product-filters-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.product-filters-footer button {
+  flex: 1;
+  padding: 13px 10px;
+  border: 1px solid #29251f;
+  background: #fff;
+  color: #29251f;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.product-filters-footer button:last-child {
+  background: #29251f;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .product-filters-panel {
+    width: 100%;
+  }
+}
+
+/* Price Range Filter */
+
+.product-filter-price {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.product-filter-price label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.product-filter-price label span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.product-filter-price input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ded9d0;
+  border-radius: 6px;
+  background: #fff;
+  color: #29251f;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.product-filter-price input:focus {
+  border-color: #29251f;
+}
+
+.product-filter-price input::placeholder {
+  color: #999;
+}
+
+/* Tags Filter */
+
+.product-filter-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.product-filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 10px;
+  border: 1px solid #e5e1db;
+  border-radius: 8px;
+  background: #faf9f7;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.product-filter-options label:hover {
+  border-color: #29251f;
+  background: #f2f0ec;
+}
+
+.product-filter-options label:has(input:checked) {
+  border-color: #29251f;
+  background: #eaf5f7;
+}
+
+.product-filter-options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: #29251f;
+  cursor: pointer;
+}
+
+.product-filter-options span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #29251f;
+  line-height: 1.4;
+}
+
+.product-filter-options label:has(input:checked) span {
+  font-weight: 600;
+}
+
+/* Mobile */
+
+@media (max-width: 360px) {
+  .product-filter-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Color Filter */
+
+.product-filter-colours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.product-filter-colours label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #e5e1db;
+  border-radius: 8px;
+  background: #faf9f7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-filter-colours label:hover {
+  border-color: #29251f;
+}
+
+.product-filter-colours label:has(input:checked) {
+  border-color: #29251f;
+  background: #eaf5f7;
+}
+
+.product-filter-colours input[type="radio"] {
+  accent-color: #29251f;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.product-filter-colour-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #d5d5d5;
+  flex-shrink: 0;
+}
+
+.product-filter-colours label > span:last-child {
+  font-size: 13px;
+  font-weight: 500;
+  color: #29251f;
+}
+
+/* Mobile */
+
+@media (max-width: 360px) {
+  .product-filter-colours {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* Size Filter */
+
+.product-filter-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.product-filter-size {
+  min-width: 48px;
+  padding: 10px 14px;
+  border: 1px solid #ded9d0;
+  border-radius: 6px;
+  background: #fff;
+  color: #29251f;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-filter-size:hover {
+  border-color: #29251f;
+}
+
+.product-filter-size.active {
+  background: #29251f;
+  border-color: #29251f;
+  color: #fff;
+}
+
+/* Category and Subcategory dropdowns */
+
+.product-filter-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #29251f;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.product-filter-select:hover {
+  border-color: #999;
+}
+
+.product-filter-select:focus {
+  border-color: #478b95;
+  box-shadow: 0 0 0 3px rgba(71, 139, 149, 0.12);
+}
+
+.product-filter-select option {
+  color: #29251f;
+}
+
+
+
+/* Category and Subcategory Filters */
+
+.product-filter-select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #29251f;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-filter-select:hover {
+  border-color: #478b95;
+}
+
+.product-filter-select:focus {
+  border-color: #478b95;
+  box-shadow: 0 0 0 3px rgba(71, 139, 149, 0.12);
+}
+
+.product-filter-select option {
+  background-color: #fff;
+  color: #29251f;
+}

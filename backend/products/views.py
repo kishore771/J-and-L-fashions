@@ -125,6 +125,8 @@ class ProductListView(ListAPIView):
         'sku',
         'description',
         'short_description',
+        'subcategory__name',
+        'subcategory__category__name',
     ]
     ordering_fields = [
         'name',
