@@ -42,6 +42,16 @@ const DashboardLayout = () => {
                 Products
               </Link>
             </li>
+
+            <li className="dashboard-navigation-item">
+              <Link
+                to="/admin/orders"
+                className="dashboard-navigation-link"
+              >
+                Orders
+              </Link>
+            </li>
+
           </ul>
         </nav>
       </aside>

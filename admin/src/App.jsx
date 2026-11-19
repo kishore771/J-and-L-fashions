@@ -9,6 +9,7 @@ import BulkUpload from './pages/BulkUpload/BulkUpload';
 import AddProduct from './pages/AddProduct/AddProduct';
 import EditProduct from './pages/EditProduct/EditProduct';
 import ProductManagement from "./pages/ProductManagement/ProductManagement";
+import OrderManagement from './pages/OrderManagement/OrderManagement';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<DashboardLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="orders" element={<OrderManagement />} />
 
             <Route path="products" element={<Products />} />
 

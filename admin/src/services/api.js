@@ -390,3 +390,26 @@ export const uploadBulkProducts = async (excelFile, token) => {
 
   return data;
 };
+
+
+export const getOrders = async (token) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/orders/manage/`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      'Unable to fetch customer orders.'
+    );
+  }
+
+  const data = await response.json();
+
+  return data;
+};

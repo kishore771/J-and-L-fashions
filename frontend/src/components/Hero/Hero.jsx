@@ -7,7 +7,7 @@ import './Hero.css';
 const slides = [
   {
     id: 1,
-    subtitle: 'J&L FASHIONS',
+    subtitle: 'J&L FASHION',
     title: 'Style That Speaks For You',
     description:
       'Discover timeless fashion and redefine your everyday style.',

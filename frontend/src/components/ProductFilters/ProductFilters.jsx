@@ -1,6 +1,7 @@
 
 import './ProductFilters.css';
 
+
 const ProductFilters = ({
     isOpen,
     onClose,

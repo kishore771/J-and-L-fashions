@@ -5,6 +5,8 @@ import { Link, useLocation } from 'react-router';
 import ProductCard from '../../components/ProductCard/ProductCard';
 import ProductToolbar from '../../components/ProductToolbar/ProductToolbar';
 import ProductFilters from '../../components/ProductFilters/ProductFilters';
+import SubcategoryTabs from '../../components/SubcategoryTabs/SubcategoryTabs';
+
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -32,9 +34,17 @@ const Products = () => {
     new URLSearchParams(location.search).get('search')?.trim() || '';
 
   useEffect(() => {
-    // Reset pagination when department or search changes
     setCurrentPage(1);
+    setSelectedCategory('');
+    setSelectedSubcategory('');
+    setSelectedTags([]);
+    setMinPrice('');
+    setMaxPrice('');
+    setSelectedColour(null);
+    setSelectedSize('');
+    setSortBy('default');
   }, [department, searchQuery]);
+
 
 useEffect(() => {
   const controller = new AbortController();
@@ -266,6 +276,19 @@ useEffect(() => {
         <h1>{pageTitle}</h1>
         <p>Explore our latest fashion collection.</p>
       </div>
+        {department !== 'collections' && (
+          <SubcategoryTabs
+            subcategories={subcategories.filter(
+              (subcategory) =>
+                !selectedCategory ||
+                subcategory.category?.id === Number(selectedCategory)
+            )}
+            department={department}
+            selectedSubcategory={selectedSubcategory}
+            onSubcategoryChange={handleSubcategoryChange}
+          />
+        )}
+
       <ProductToolbar
           sortBy={sortBy}
           onSortChange={handleSortChange}

@@ -1,12 +1,15 @@
 import TransparentLogo from '../../assets/logos/Transparent-logo.png';
-import { UserRound, Heart, ShoppingBag, Search, X } from 'lucide-react';
+import { UserRound, Heart, ShoppingCart, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router';
+import { useCart } from '../../context/CartContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { cartCount } = useCart();
   const navigate = useNavigate();
+
   const location = useLocation();
 
   useEffect(() => {
@@ -65,8 +68,18 @@ const Navbar = () => {
     <Heart />
   </Link>
 
-  <Link to="/cart" className="navbar-icon">
-    <ShoppingBag />
+    <Link
+    to="/cart"
+    className="navbar-icon navbar-cart"
+    aria-label={`Shopping cart with ${cartCount} items`}
+  >
+    <ShoppingCart size={24} strokeWidth={1.8} />
+
+    {cartCount > 0 && (
+      <span className="cart-count">
+        {cartCount > 99 ? '99+' : cartCount}
+      </span>
+    )}
   </Link>
   <Link to="/profile" className="navbar-icon">
     <UserRound />
