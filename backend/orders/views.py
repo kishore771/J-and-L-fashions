@@ -1,0 +1,503 @@
+
+import hashlib
+import json
+import logging
+from decimal import Decimal
+
+
+
+
+from django.db import IntegrityError, transaction
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
+from rest_framework.exceptions import PermissionDenied
+
+from rest_framework.permissions import IsAdminUser
+from .serializers import OrderManagementSerializer
+
+from products.models import ProductVariant
+from .models import Order, OrderItem
+from .serializers import CheckoutSerializer
+
+
+
+logger = logging.getLogger(__name__)
+
+
+class CheckoutError(Exception):
+    pass
+
+
+def get_request_hash(data):
+    """Create a consistent fingerprint of checkout details."""
+
+    payload = {
+        'full_name': data['full_name'],
+        'email': data['email'],
+        'phone': data['phone'],
+        'address': data['address'],
+        'apartment': data.get('apartment', ''),
+        'city': data['city'],
+        'state': data['state'],
+        'pincode': data['pincode'],
+        'items': sorted(
+            [
+                {
+                    'variant_id': item['variant_id'],
+                    'quantity': item['quantity'],
+                }
+                for item in data['items']
+            ],
+            key=lambda item: item['variant_id']
+        ),
+    }
+
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(',', ':')
+    ).encode('utf-8')
+
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def order_response(order, already_exists=False):
+    return Response(
+        {
+            'message': (
+                'Existing COD order retrieved successfully.'
+                if already_exists
+                else 'COD order confirmed successfully.'
+            ),
+            'order_id': order.id,
+            'subtotal': str(order.subtotal),
+            'shipping_charge': str(order.shipping_charge),
+            'total_amount': str(order.total_amount),
+            'status': order.status,
+            'payment_method': order.payment_method,
+            'payment_status': order.payment_status,
+            'already_exists': already_exists,
+        },
+        status=(
+            status.HTTP_200_OK
+            if already_exists
+            else status.HTTP_201_CREATED
+        )
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_checkout(request):
+    serializer = CheckoutSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    data = serializer.validated_data
+    idempotency_key = data['idempotency_key']
+    request_hash = get_request_hash(data)
+
+    # Fast path for requests that have already succeeded.
+    existing_order = Order.objects.filter(
+        idempotency_key=idempotency_key
+    ).first()
+
+    if existing_order:
+        if existing_order.checkout_request_hash != request_hash:
+            return Response(
+                {
+                    'error': (
+                        'This checkout key was already used '
+                        'with different order details.'
+                    )
+                },
+                status=status.HTTP_409_CONFLICT
+            )
+
+        return order_response(existing_order, already_exists=True)
+
+    try:
+        with transaction.atomic():
+            subtotal = Decimal('0.00')
+            order_items = []
+
+            items = sorted(
+                data['items'],
+                key=lambda item: item['variant_id']
+            )
+
+            for item in items:
+                variant_id = item['variant_id']
+                quantity = item['quantity']
+
+                try:
+                    variant = (
+                        ProductVariant.objects
+                        .select_related('product', 'colour')
+                        .select_for_update()
+                        .get(id=variant_id)
+                    )
+                except ProductVariant.DoesNotExist:
+                    raise CheckoutError(
+                        f'Product variant {variant_id} does not exist.'
+                    )
+
+                if (
+                    not variant.is_active
+                    or not variant.product.is_active
+                ):
+                    raise CheckoutError(
+                        f'{variant.product.name} is currently unavailable.'
+                    )
+
+                if variant.stock < quantity:
+                    raise CheckoutError(
+                        f'Insufficient stock for '
+                        f'{variant.product.name} '
+                        f'({variant.colour.name}, {variant.size}).'
+                    )
+
+                unit_price = (
+                    variant.sale_price
+                    if variant.sale_price is not None
+                    else variant.price
+                )
+
+                total_price = unit_price * quantity
+                subtotal += total_price
+
+                order_items.append({
+                    'product_id': variant.product.id,
+                    'variant_id': variant.id,
+                    'product_name': variant.product.name,
+                    'colour': variant.colour.name,
+                    'size': variant.size,
+                    'quantity': quantity,
+                    'unit_price': unit_price,
+                    'total_price': total_price,
+                })
+
+                variant.stock -= quantity
+                variant.save(update_fields=['stock'])
+
+            shipping_charge = Decimal('0.00')
+            total_amount = subtotal + shipping_charge
+
+            # The unique database constraint ensures that
+            # concurrent requests cannot create duplicate orders.
+            order = Order.objects.create(
+                idempotency_key=idempotency_key,
+                checkout_request_hash=request_hash,
+                full_name=data['full_name'],
+                email=data['email'],
+                phone=data['phone'],
+                address=data['address'],
+                apartment=data.get('apartment', ''),
+                city=data['city'],
+                state=data['state'],
+                pincode=data['pincode'],
+                subtotal=subtotal,
+                shipping_charge=shipping_charge,
+                total_amount=total_amount,
+                status='confirmed',
+                payment_method='cod',
+                payment_status='pending',
+            )
+
+            OrderItem.objects.bulk_create([
+                OrderItem(order=order, **item)
+                for item in order_items
+            ])
+
+        return order_response(order)
+
+    except IntegrityError:
+        # A simultaneous request may have created this order.
+        # The failed transaction has rolled back stock changes.
+        existing_order = Order.objects.filter(
+            idempotency_key=idempotency_key
+        ).first()
+
+        if existing_order:
+            if existing_order.checkout_request_hash != request_hash:
+                return Response(
+                    {
+                        'error': (
+                            'This checkout key was already used '
+                            'with different order details.'
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT
+                )
+
+            return order_response(
+                existing_order,
+                already_exists=True
+            )
+
+        logger.exception('Checkout database integrity error')
+
+        return Response(
+            {'error': 'Unable to complete checkout. Please try again.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    except CheckoutError as error:
+        return Response(
+            {'error': str(error)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    except Exception:
+        logger.exception('Unexpected checkout error')
+
+        return Response(
+            {
+                'error': (
+                    'Unable to place your order. '
+                    'Please try again.'
+                )
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def cancel_order(request, order_id):
+    """
+    Cancel a COD order and restore inventory exactly once.
+    Only authenticated staff can perform this action.
+    """
+
+    try:
+        with transaction.atomic():
+
+            # Lock the order to prevent simultaneous cancellation.
+            try:
+                order = (
+                    Order.objects
+                    .select_for_update()
+                    .get(id=order_id)
+                )
+            except Order.DoesNotExist:
+                return Response(
+                    {'error': 'Order not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Prevent stock from being restored twice.
+            if order.status == 'cancelled':
+                return Response(
+                    {
+                        'message': 'Order is already cancelled.',
+                        'order_id': order.id,
+                        'status': order.status,
+                        'already_cancelled': True,
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            # Only confirmed or processing COD orders can be cancelled.
+            if (
+                order.payment_method != 'cod'
+                or order.status not in ['confirmed', 'processing']
+            ):
+                return Response(
+                    {
+                        'error': (
+                            'Only confirmed or processing '
+                            'COD orders can be cancelled.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Retrieve the purchased items.
+            items = list(order.items.all())
+
+            # Lock variants in a consistent order to reduce deadlocks.
+            variant_ids = sorted({
+                item.variant_id for item in items
+            })
+
+            variants = {
+                variant.id: variant
+                for variant in (
+                    ProductVariant.objects
+                    .select_for_update()
+                    .filter(id__in=variant_ids)
+                    .order_by('id')
+                )
+            }
+
+            # Restore stock for every purchased variant.
+            for item in items:
+                variant = variants.get(item.variant_id)
+
+                if variant is None:
+                    raise CheckoutError(
+                        f'Cannot restore stock: '
+                        f'variant {item.variant_id} is missing.'
+                    )
+
+                variant.stock += item.quantity
+                variant.save(update_fields=['stock'])
+
+            # Update order status in the same transaction.
+            order.status = 'cancelled'
+            order.save(update_fields=['status', 'updated_at'])
+
+        return Response(
+            {
+                'message': 'Order cancelled successfully.',
+                'order_id': order.id,
+                'status': order.status,
+                'stock_restored': True,
+                'already_cancelled': False,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except CheckoutError as error:
+        return Response(
+            {'error': str(error)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    except Exception:
+        logger.exception(
+            'Unexpected cancellation error for order %s',
+            order_id
+        )
+
+        return Response(
+            {'error': 'Unable to cancel order.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def list_orders(request):
+    """
+    Retrieve customer orders for authenticated staff.
+    Newest orders appear first.
+    """
+
+    orders = (
+        Order.objects
+        .prefetch_related('items')
+        .order_by('-created_at', '-id')
+    )
+
+    serializer = OrderManagementSerializer(
+        orders,
+        many=True
+    )
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_200_OK
+    )
+
+
+def get_allowed_next_statuses(current_status):
+    """
+    Return the statuses an order can move to.
+    Cancellation is handled separately by cancel_order.
+    """
+
+    transitions = {
+        'pending': ['confirmed'],
+        'confirmed': ['processing'],
+        'processing': ['shipped'],
+        'shipped': ['delivered'],
+        'delivered': [],
+        'cancelled': [],
+    }
+
+    return transitions.get(current_status, [])
+
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def update_order_status(request, order_id):
+    """
+    Allow staff to update an order's delivery status.
+    Only permitted status transitions are accepted.
+    """
+
+    new_status = request.data.get('status')
+
+    if not isinstance(new_status, str):
+        return Response(
+            {'error': 'A valid status is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        with transaction.atomic():
+            try:
+                order = (
+                    Order.objects
+                    .select_for_update()
+                    .get(id=order_id)
+                )
+            except Order.DoesNotExist:
+                return Response(
+                    {'error': 'Order not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            allowed_statuses = get_allowed_next_statuses(
+                order.status
+            )
+
+            if new_status not in allowed_statuses:
+                return Response(
+                    {
+                        'error': (
+                            f'Cannot change order status from '
+                            f'{order.status} to {new_status}.'
+                        ),
+                        'allowed_statuses': allowed_statuses,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            previous_status = order.status
+            order.status = new_status
+            order.save(
+                update_fields=['status', 'updated_at']
+            )
+
+        return Response(
+            {
+                'message': 'Order status updated successfully.',
+                'order_id': order.id,
+                'previous_status': previous_status,
+                'status': order.status,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except Exception:
+        logger.exception(
+            'Unable to update status for order %s',
+            order_id
+        )
+
+        return Response(
+            {'error': 'Unable to update order status.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

@@ -1,4 +1,6 @@
 from django.db import models
+import uuid
+from django.utils.text import slugify
 
 # Create your models here.
 class Category(models.Model):
@@ -121,6 +123,21 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name) or "product"
+            slug = base_slug
+            counter = 1
+
+            while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        if not self.sku:
+            self.sku = f"JLF-{uuid.uuid4().hex[:12].upper()}"
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -245,7 +262,17 @@ class ProductVariant(models.Model):
                 name='valid_variant_pricing'
             )
         ]
+    def save(self, *args, **kwargs):
+        if not self.sku:
+            size_code = slugify(self.size).replace("-", "").upper()
 
+            self.sku = (
+                f"{self.product.sku}-"
+                f"C{self.colour_id}-"
+                f"{size_code}"
+            )
+
+        super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.product.name} - {self.colour.name if self.colour else 'No Colour'} - {self.size}"
 
