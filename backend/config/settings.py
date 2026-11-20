@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'products',
     'orders',
+    'accounts',
 ]
 
 
@@ -103,14 +104,28 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
-# Database
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DEBUG and not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is required when DJANGO_DEBUG=False"
+    )
+
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=(
+            DATABASE_URL
+            or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        ),
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
+
+if not DEBUG and DATABASES["default"]["ENGINE"] != "django.db.backends.postgresql":
+    raise RuntimeError(
+        "Production must use PostgreSQL"
+    )
 
 
 # Password validation
@@ -181,6 +196,18 @@ CORS_ALLOWED_ORIGINS = [
     for origin in os.environ.get(
         "DJANGO_CORS_ALLOWED_ORIGINS",
         "http://localhost:5173,http://localhost:5174,https://jandlfashion.com,https://www.jandlfashion.com"
+    ).split(",")
+    if origin.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get(
+        "DJANGO_CSRF_TRUSTED_ORIGINS",
+        "http://localhost:5173,"
+        "http://localhost:5174,"
+        "https://jandlfashion.com,"
+        "https://www.jandlfashion.com"
     ).split(",")
     if origin.strip()
 ]

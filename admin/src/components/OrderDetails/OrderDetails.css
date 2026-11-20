@@ -1,0 +1,32 @@
+.order-details-item {
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.order-details-item p {
+  margin: 6px 0;
+}
+
+.cancel-order-btn {
+  margin-left: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #dc2626;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cancel-order-btn:hover {
+  background: #b91c1c;
+}
+
+.cancel-order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

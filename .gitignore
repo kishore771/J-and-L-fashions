@@ -48,3 +48,10 @@ backend/media/
 
 # Django collected static files
 backend/staticfiles/
+
+# Local backups
+backend/media_backup/
+backend/products_backup.json
+backend/products_before_cloudinary.json
+backend/products_cloudinary_export.json
+/backend/migrate_images.py

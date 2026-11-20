@@ -62,7 +62,7 @@ class CategoryListView(ListAPIView):
     queryset = Category.objects.filter(
         is_active=True,
         department__is_active=True
-    ).select_related('department')
+    ).select_related('department').order_by('id')
 
     serializer_class = CategorySerializer
 

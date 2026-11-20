@@ -202,7 +202,7 @@ class ProductListAPITests(APITestCase):
         )
 
     def test_product_list_pagination(self):
-        for number in range(2, 12):
+        for number in range(2, 14):
             Product.objects.create(
                 name=f'Test Product {number}',
                 sku=f'TEST-PROD-{number}',
@@ -220,8 +220,8 @@ class ProductListAPITests(APITestCase):
             status.HTTP_200_OK
         )
 
-        self.assertEqual(response.data['count'], 11)
-        self.assertEqual(len(response.data['results']), 10)
+        self.assertEqual(response.data['count'], 13)
+        self.assertEqual(len(response.data['results']), 12)
         self.assertIsNotNone(response.data['next'])
 
     def test_inactive_products_are_excluded(self):
@@ -341,10 +341,22 @@ class ProductListAPITests(APITestCase):
             'Created Test Product'
         )
 
+        created_product = Product.objects.get(
+            name='Created Test Product'
+        )
+
         self.assertTrue(
-            Product.objects.filter(
-                sku='TEST-CREATE-001'
-            ).exists()
+            created_product.sku.startswith('JLF-')
+        )
+
+        self.assertEqual(
+            created_product.slug,
+            'created-test-product'
+        )
+
+        self.assertEqual(
+            response.data['sku'],
+            created_product.sku
         )
 
     def test_admin_can_update_product(self):

@@ -2,12 +2,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-
+from django.contrib.auth import authenticate, login, logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('products.urls')),
     path('api/orders/', include('orders.urls')),
+    path('api/accounts/', include('accounts.urls')),
 ]
 
 

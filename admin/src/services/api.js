@@ -413,3 +413,51 @@ export const getOrders = async (token) => {
 
   return data;
 };
+
+export const updateOrderStatus = async (token, orderId, newStatus) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/orders/${orderId}/status/`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: newStatus,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || 'Unable to update order status.'
+    );
+  }
+
+  return data;
+};
+
+export const cancelOrder = async (token, orderId) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/orders/${orderId}/cancel/`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || 'Unable to cancel the order.'
+    );
+  }
+
+  return data;
+};

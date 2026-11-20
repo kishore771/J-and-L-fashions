@@ -50,7 +50,7 @@ const ContactInfo = () => {
 
           <div className="contact-info-details">
             <h3>Email Address</h3>
-            <p>jandlfashions27@gmail.com</p>
+            <p>jandlfashion.sales@gmail.com</p>
           </div>
         </div>
 

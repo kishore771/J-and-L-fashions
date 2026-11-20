@@ -1,8 +1,7 @@
-
-import { useState } from 'react';
 import { Link } from 'react-router';
 import { ShoppingCart, LockKeyhole } from 'lucide-react';
-
+import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 
 import {
@@ -24,6 +23,7 @@ const initialFormData = {
 };
 
 const Checkout = () => {
+  const { user } = useAuth();
   const {
     cartItems,
     cartSubtotal,
@@ -31,6 +31,25 @@ const Checkout = () => {
   } = useCart();
 
   const [formData, setFormData] = useState(initialFormData);
+
+
+useEffect(() => {
+  if (!user) return;
+
+  const fullName = [
+    user.first_name,
+    user.last_name,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  setFormData((previous) => ({
+    ...previous,
+    fullName: previous.fullName || fullName,
+    email: previous.email || user.email || '',
+  }));
+}, [user]);
+
 
   const [errors, setErrors] = useState({});
 
@@ -168,16 +187,37 @@ const Checkout = () => {
       // Reuse the UUID when retrying the same checkout
       payload.idempotency_key = getCheckoutAttempt(payload);
 
-      const response = await fetch(
-        '/api/orders/checkout/',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+
+    // Step 1: Initialize Django's CSRF cookie.
+const csrfResponse = await fetch('/api/accounts/csrf/', {
+  credentials: 'include',
+});
+
+if (!csrfResponse.ok) {
+  throw new Error('Unable to initialize checkout security.');
+}
+
+// Step 2: Read the CSRF token.
+const csrfToken = document.cookie
+  .split('; ')
+  .find((cookie) => cookie.startsWith('csrftoken='))
+  ?.split('=')[1];
+
+if (!csrfToken) {
+  throw new Error('Checkout security token was not found.');
+}
+
+// Step 3: Submit the COD order.
+const response = await fetch('/api/orders/checkout/', {
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': decodeURIComponent(csrfToken),
+  },
+  body: JSON.stringify(payload),
+});
+
 
       const data = await response.json();
 
@@ -243,10 +283,6 @@ const Checkout = () => {
     setErrors({});
     setFormData({ ...initialFormData });
   };
-
-  // ==========================================
-  // 1. CONFIRMED ORDER SCREEN
-  // ==========================================
 
   if (pendingOrder) {
     return (
@@ -329,10 +365,6 @@ const Checkout = () => {
       </section>
     );
   }
-
-  // ==========================================
-  // 3. CHECKOUT FORM
-  // ==========================================
 
   return (
     <section className="checkout-page">
@@ -577,7 +609,7 @@ const Checkout = () => {
           <div className="checkout-summary-row">
             <span>Shipping</span>
 
-            <span>₹0.00 (Free)</span>
+            <span>â‚¹0.00 (Free)</span>
           </div>
 
           <p className="checkout-note">

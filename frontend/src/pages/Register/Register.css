@@ -1,0 +1,105 @@
+
+.register-page {
+  min-height: calc(100vh - 85px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #eaf8fa, #ffffff);
+}
+
+.register-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 35px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.register-container h1 {
+  margin: 0 0 10px;
+  color: #29251f;
+  text-align: center;
+  font-size: 28px;
+}
+
+.register-container > p {
+  margin-bottom: 25px;
+  color: #666;
+  text-align: center;
+  font-size: 14px;
+}
+
+.register-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.register-container label {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.register-container input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.register-container input:focus {
+  border-color: #56b7c6;
+}
+
+.register-container button {
+  margin-top: 15px;
+  padding: 14px;
+  background: #d3eef3;
+  color: #29251f;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.register-container button:hover {
+  background: #a9dfe8;
+}
+
+.register-container a {
+  color: #168a9d;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-container a:hover {
+  text-decoration: underline;
+}
+
+.register-login-link {
+  margin-top: 25px;
+  margin-bottom: 0 !important;
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    padding: 25px 15px;
+  }
+
+  .register-container {
+    padding: 30px 22px;
+  }
+
+  .register-container h1 {
+    font-size: 24px;
+  }
+}

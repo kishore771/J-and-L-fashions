@@ -1,5 +1,6 @@
 
 from django.db import models
+from django.conf import settings
 
 
 class Order(models.Model):
@@ -23,6 +24,25 @@ class Order(models.Model):
         ('cod', 'Cash on Delivery'),
         ('razorpay', 'Razorpay'),
     ]
+
+    # Identifies the browser session that created a guest order.
+    # Stores a hash rather than the raw Django session key.
+    guest_session_hash = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        editable=False,
+        db_index=True
+    )
+
+    # Registered customer (optional for guest checkout)
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orders'
+    )
 
     # Customer information
     full_name = models.CharField(max_length=150)
@@ -93,6 +113,7 @@ class Order(models.Model):
         blank=True,
         editable=False
     )
+
     checkout_request_hash = models.CharField(
         max_length=64,
         blank=True,

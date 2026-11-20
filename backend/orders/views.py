@@ -1,11 +1,7 @@
-
 import hashlib
 import json
 import logging
 from decimal import Decimal
-
-
-
 
 from django.db import IntegrityError, transaction
 from rest_framework import status
@@ -21,14 +17,36 @@ from .serializers import OrderManagementSerializer
 from products.models import ProductVariant
 from .models import Order, OrderItem
 from .serializers import CheckoutSerializer
-
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import authentication_classes
+from django.views.decorators.csrf import csrf_protect
+from rest_framework.authentication import CSRFCheck
+from django.utils.crypto import get_random_string
 
 
 logger = logging.getLogger(__name__)
 
-
 class CheckoutError(Exception):
     pass
+
+
+def enforce_checkout_csrf(request):
+    """Require a valid CSRF token for every checkout request."""
+    check = CSRFCheck(lambda request: None)
+
+    check.process_request(request)
+
+    reason = check.process_view(
+        request,
+        lambda request: None,
+        (),
+        {}
+    )
+
+    if reason:
+        raise PermissionDenied(
+            'CSRF verification failed.'
+        )
 
 
 def get_request_hash(data):
@@ -63,6 +81,24 @@ def get_request_hash(data):
 
     return hashlib.sha256(encoded).hexdigest()
 
+def get_guest_session_hash(request):
+    """
+    Return a stable, hashed identifier for the guest checkout session.
+    """
+
+    session = request.session
+
+    # Create a random identifier for guest checkout.
+    # This remains stable across requests in the same session.
+    guest_id = session.get('guest_checkout_id')
+
+    if not guest_id:
+        guest_id = get_random_string(64)
+        session['guest_checkout_id'] = guest_id
+
+    return hashlib.sha256(
+        guest_id.encode('utf-8')
+    ).hexdigest()
 
 def order_response(order, already_exists=False):
     return Response(
@@ -88,10 +124,57 @@ def order_response(order, already_exists=False):
         )
     )
 
+def existing_order_response(order, request_hash, customer, guest_session_hash=None):
 
+    # Reject requests with different checkout details.
+    if order.checkout_request_hash != request_hash:
+        return Response(
+            {'error': 'This checkout key was already used.'},
+            status=409
+        )
+
+    # Registered customer orders
+    if order.customer_id is not None:
+        if customer is None or order.customer_id != customer.id:
+            return Response(
+                {'error': 'This checkout key was already used.'},
+                status=409
+            )
+
+    # Guest orders
+    else:
+        if customer is not None:
+            return Response(
+                {'error': 'This checkout key was already used.'},
+                status=409
+            )
+
+        # Reject older guest orders without session ownership data.
+        if not order.guest_session_hash:
+            return Response(
+                {'error': 'This checkout key was already used.'},
+                status=409
+            )
+
+        # Only the original guest session may retry.
+        if (
+            not guest_session_hash
+            or order.guest_session_hash != guest_session_hash
+        ):
+            return Response(
+                {'error': 'This checkout key was already used.'},
+                status=409
+            )
+
+    return order_response(order, already_exists=True)
+
+@csrf_protect
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication])
 @permission_classes([AllowAny])
 def create_checkout(request):
+    enforce_checkout_csrf(request._request)
+
     serializer = CheckoutSerializer(data=request.data)
 
     if not serializer.is_valid():
@@ -101,8 +184,22 @@ def create_checkout(request):
         )
 
     data = serializer.validated_data
+    # Link orders to registered customers only
+    customer = (
+        request.user
+        if request.user.is_authenticated
+        and not request.user.is_staff
+        and not request.user.is_superuser
+        else None
+    )
     idempotency_key = data['idempotency_key']
     request_hash = get_request_hash(data)
+
+    guest_session_hash = (
+        get_guest_session_hash(request)
+        if customer is None
+        else None
+    )
 
     # Fast path for requests that have already succeeded.
     existing_order = Order.objects.filter(
@@ -110,18 +207,12 @@ def create_checkout(request):
     ).first()
 
     if existing_order:
-        if existing_order.checkout_request_hash != request_hash:
-            return Response(
-                {
-                    'error': (
-                        'This checkout key was already used '
-                        'with different order details.'
-                    )
-                },
-                status=status.HTTP_409_CONFLICT
-            )
-
-        return order_response(existing_order, already_exists=True)
+        return existing_order_response(
+            existing_order,
+            request_hash,
+            customer,
+            guest_session_hash
+        )
 
     try:
         with transaction.atomic():
@@ -193,6 +284,8 @@ def create_checkout(request):
             # The unique database constraint ensures that
             # concurrent requests cannot create duplicate orders.
             order = Order.objects.create(
+                customer=customer,
+                guest_session_hash=guest_session_hash,
                 idempotency_key=idempotency_key,
                 checkout_request_hash=request_hash,
                 full_name=data['full_name'],
@@ -226,20 +319,11 @@ def create_checkout(request):
         ).first()
 
         if existing_order:
-            if existing_order.checkout_request_hash != request_hash:
-                return Response(
-                    {
-                        'error': (
-                            'This checkout key was already used '
-                            'with different order details.'
-                        )
-                    },
-                    status=status.HTTP_409_CONFLICT
-                )
-
-            return order_response(
+            return existing_order_response(
                 existing_order,
-                already_exists=True
+                request_hash,
+                customer,
+                guest_session_hash
             )
 
         logger.exception('Checkout database integrity error')
@@ -267,8 +351,6 @@ def create_checkout(request):
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-
 
 
 @api_view(['POST'])

@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from .models import Order
+import uuid
 
 from products.models import (
     Department,
@@ -334,3 +335,154 @@ class OrderStatusAPITests(APITestCase):
 
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, 'cancelled')
+
+class CheckoutCSRFTests(APITestCase):
+
+    def test_guest_checkout_without_csrf_is_rejected(self):
+        client = APIClient(enforce_csrf_checks=True)
+
+        response = client.post(
+            '/api/orders/checkout/',
+            {},
+            format='json'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+        self.assertEqual(
+            Order.objects.count(),
+            0
+        )
+
+    def test_guest_checkout_with_valid_csrf_reaches_validation(self):
+        client = APIClient(enforce_csrf_checks=True)
+
+        csrf_response = client.get('/api/accounts/csrf/')
+        self.assertEqual(csrf_response.status_code, 200)
+
+        csrf_token = client.cookies['csrftoken'].value
+
+        response = client.post(
+            '/api/orders/checkout/',
+            {},
+            format='json',
+            HTTP_X_CSRFTOKEN=csrf_token
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+
+        self.assertIn('items', response.data)
+
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_valid_guest_checkout_retry_does_not_reduce_stock_twice(self):
+        department = Department.objects.create(
+            name='Test Department',
+            slug='checkout-test-department'
+        )
+
+        category = Category.objects.create(
+            name='Test Category',
+            slug='checkout-test-category',
+            department=department
+        )
+
+        subcategory = Subcategory.objects.create(
+            name='Test Subcategory',
+            slug='checkout-test-subcategory',
+            category=category
+        )
+
+        product = Product.objects.create(
+            name='Checkout Test Product',
+            short_description='Test product',
+            description='Product for checkout testing',
+            subcategory=subcategory
+        )
+
+        colour = Colour.objects.create(
+            name='Checkout Test Blue'
+        )
+
+        variant = ProductVariant.objects.create(
+            product=product,
+            colour=colour,
+            size='M',
+            price=Decimal('500.00'),
+            stock=10
+        )
+
+        client = APIClient(enforce_csrf_checks=True)
+
+        csrf_response = client.get('/api/accounts/csrf/')
+        self.assertEqual(csrf_response.status_code, 200)
+
+        csrf_token = client.cookies['csrftoken'].value
+
+        payload = {
+            'full_name': 'Test Customer',
+            'email': 'checkout-test@example.com',
+            'phone': '9876543210',
+            'address': '123 Test Street',
+            'city': 'Hyderabad',
+            'state': 'Telangana',
+            'pincode': '500001',
+            'items': [
+                {
+                    'variant_id': variant.id,
+                    'quantity': 2
+                }
+            ],
+            'idempotency_key': str(uuid.uuid4())
+        }
+
+        first_response = client.post(
+            '/api/orders/checkout/',
+            payload,
+            format='json',
+            HTTP_X_CSRFTOKEN=csrf_token
+        )
+
+        self.assertEqual(
+            first_response.status_code,
+            status.HTTP_201_CREATED,
+            first_response.data
+        )
+
+        variant.refresh_from_db()
+
+        self.assertEqual(variant.stock, 8)
+        self.assertEqual(Order.objects.count(), 1)
+
+        second_response = client.post(
+            '/api/orders/checkout/',
+            payload,
+            format='json',
+            HTTP_X_CSRFTOKEN=csrf_token
+        )
+
+        self.assertEqual(
+            second_response.status_code,
+            status.HTTP_200_OK,
+            second_response.data
+        )
+
+        self.assertEqual(
+            first_response.data['order_id'],
+            second_response.data['order_id']
+        )
+
+        self.assertTrue(
+            second_response.data['already_exists']
+        )
+
+        variant.refresh_from_db()
+
+        self.assertEqual(variant.stock, 8)
+        self.assertEqual(Order.objects.count(), 1)

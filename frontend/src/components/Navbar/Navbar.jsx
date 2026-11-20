@@ -2,12 +2,14 @@ import TransparentLogo from '../../assets/logos/Transparent-logo.png';
 import { UserRound, Heart, ShoppingCart, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router';
+import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { cartCount } = useCart();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const location = useLocation();
@@ -81,7 +83,12 @@ const Navbar = () => {
       </span>
     )}
   </Link>
-  <Link to="/profile" className="navbar-icon">
+  <Link
+    to={isAuthenticated ? '/profile' : '/login'}
+    className="navbar-icon"
+    aria-label={isAuthenticated ? 'My profile' : 'Sign in'}
+    title={isAuthenticated ? 'My Profile' : 'Sign In'}
+  >
     <UserRound />
   </Link>
 </div>
