@@ -13,6 +13,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from rest_framework.permissions import IsAdminUser
 from .serializers import OrderManagementSerializer
+from .serializers import CustomerOrderSerializer
 
 from products.models import ProductVariant
 from .models import Order, OrderItem
@@ -28,6 +29,47 @@ logger = logging.getLogger(__name__)
 
 class CheckoutError(Exception):
     pass
+
+
+def restore_cancelled_order_stock(order):
+    """
+    Restore inventory for a cancelled order.
+
+    Must be called inside transaction.atomic()
+    after locking the order with select_for_update().
+    """
+
+    # Retrieve all purchased items.
+    items = list(order.items.all())
+
+    # Collect variant IDs in a consistent order.
+    variant_ids = sorted({
+        item.variant_id for item in items
+    })
+
+    # Lock product variants to protect inventory updates.
+    variants = {
+        variant.id: variant
+        for variant in (
+            ProductVariant.objects
+            .select_for_update()
+            .filter(id__in=variant_ids)
+            .order_by('id')
+        )
+    }
+
+    # Restore purchased quantities.
+    for item in items:
+        variant = variants.get(item.variant_id)
+
+        if variant is None:
+            raise CheckoutError(
+                f'Cannot restore stock: '
+                f'variant {item.variant_id} is missing.'
+            )
+
+        variant.stock += item.quantity
+        variant.save(update_fields=['stock'])
 
 
 def enforce_checkout_csrf(request):
@@ -404,40 +446,14 @@ def cancel_order(request, order_id):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Retrieve the purchased items.
-            items = list(order.items.all())
-
-            # Lock variants in a consistent order to reduce deadlocks.
-            variant_ids = sorted({
-                item.variant_id for item in items
-            })
-
-            variants = {
-                variant.id: variant
-                for variant in (
-                    ProductVariant.objects
-                    .select_for_update()
-                    .filter(id__in=variant_ids)
-                    .order_by('id')
-                )
-            }
-
-            # Restore stock for every purchased variant.
-            for item in items:
-                variant = variants.get(item.variant_id)
-
-                if variant is None:
-                    raise CheckoutError(
-                        f'Cannot restore stock: '
-                        f'variant {item.variant_id} is missing.'
-                    )
-
-                variant.stock += item.quantity
-                variant.save(update_fields=['stock'])
+            # Restore inventory using the shared helper.
+            restore_cancelled_order_stock(order)
 
             # Update order status in the same transaction.
             order.status = 'cancelled'
-            order.save(update_fields=['status', 'updated_at'])
+            order.save(
+                update_fields=['status', 'updated_at']
+            )
 
         return Response(
             {
@@ -462,6 +478,128 @@ def cancel_order(request, order_id):
             order_id
         )
 
+        return Response(
+            {'error': 'Unable to cancel order.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([AllowAny])
+def customer_cancel_order(request, order_id):
+    """
+    Allow a registered customer or guest to cancel
+    their own unpaid COD order before processing.
+    """
+    # Enforce CSRF for guests as well as logged-in customers.
+    enforce_checkout_csrf(request)
+
+    # Staff must use the administrator cancellation endpoint.
+    if request.user.is_authenticated and (
+        request.user.is_staff or request.user.is_superuser
+    ):
+        return Response(
+            {'detail': 'Not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Determine which orders belong to this customer/session.
+    if request.user.is_authenticated:
+        owned_orders = Order.objects.filter(
+            customer=request.user
+        )
+    else:
+        guest_id = request.session.get('guest_checkout_id')
+
+        if not guest_id:
+            return Response(
+                {'detail': 'Not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        guest_hash = hashlib.sha256(
+            guest_id.encode('utf-8')
+        ).hexdigest()
+
+        owned_orders = Order.objects.filter(
+            customer__isnull=True,
+            guest_session_hash=guest_hash
+        )
+
+    try:
+        with transaction.atomic():
+            # Lock the order to prevent duplicate stock restoration.
+            order = (
+                owned_orders
+                .select_for_update()
+                .filter(id=order_id)
+                .first()
+            )
+
+            if order is None:
+                return Response(
+                    {'detail': 'Not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            if order.status == 'cancelled':
+                return Response(
+                    {
+                        'message': 'Order is already cancelled.',
+                        'order_id': order.id,
+                        'status': order.status,
+                        'already_cancelled': True,
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            # Customers may cancel only unpaid COD orders
+            # that have not entered processing.
+            if (
+                order.payment_method != 'cod'
+                or order.payment_status != 'pending'
+                or order.status not in ['pending', 'confirmed']
+            ):
+                return Response(
+                    {
+                        'error': (
+                            'This order can no longer be cancelled '
+                            'from the storefront.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Restore inventory and update status atomically.
+            restore_cancelled_order_stock(order)
+
+            order.status = 'cancelled'
+            order.save(
+                update_fields=['status', 'updated_at']
+            )
+
+        return Response(
+            {
+                'message': 'Order cancelled successfully.',
+                'order_id': order.id,
+                'status': order.status,
+                'stock_restored': True,
+                'already_cancelled': False,
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except CheckoutError as error:
+        return Response(
+            {'error': str(error)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    except Exception:
+        logger.exception(
+            'Customer cancellation failed for order %s',
+            order_id
+        )
         return Response(
             {'error': 'Unable to cancel order.'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -583,3 +721,108 @@ def update_order_status(request, order_id):
             {'error': 'Unable to update order status.'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([AllowAny])
+def order_history(request):
+    """
+    Return orders belonging to the current customer
+    or the original guest checkout session.
+    """
+
+    if (
+        request.user.is_authenticated
+        and not request.user.is_staff
+        and not request.user.is_superuser
+    ):
+        orders = Order.objects.filter(
+            customer=request.user
+        )
+
+    else:
+        guest_id = request.session.get(
+            'guest_checkout_id'
+        )
+
+        if not guest_id:
+            return Response(
+                {'orders': []},
+                status=status.HTTP_200_OK
+            )
+
+        guest_hash = hashlib.sha256(
+            guest_id.encode('utf-8')
+        ).hexdigest()
+
+        orders = Order.objects.filter(
+            customer__isnull=True,
+            guest_session_hash=guest_hash
+        )
+
+    orders = orders.prefetch_related(
+        'items'
+    ).order_by('-created_at')
+
+    serializer = OrderManagementSerializer(
+        orders,
+        many=True
+    )
+
+    return Response(
+        {'orders': serializer.data},
+        status=status.HTTP_200_OK
+    )
+
+from django.shortcuts import get_object_or_404
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([AllowAny])
+def customer_order_detail(request, order_id):
+    """
+    Retrieve an order only if it belongs to the
+    authenticated customer or current guest session.
+    """
+
+    if (
+        request.user.is_authenticated
+        and not request.user.is_staff
+        and not request.user.is_superuser
+    ):
+        orders = Order.objects.filter(
+            customer=request.user
+        )
+
+    else:
+        guest_id = request.session.get(
+            'guest_checkout_id'
+        )
+
+        if not guest_id:
+            return Response(
+                {'detail': 'Not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        guest_hash = hashlib.sha256(
+            guest_id.encode('utf-8')
+        ).hexdigest()
+
+        orders = Order.objects.filter(
+            customer__isnull=True,
+            guest_session_hash=guest_hash
+        )
+
+    order = get_object_or_404(
+        orders.prefetch_related('items'),
+        id=order_id
+    )
+
+    serializer = CustomerOrderSerializer(order)
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_200_OK
+    )

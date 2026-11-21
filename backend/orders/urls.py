@@ -6,6 +6,9 @@ from .views import (
     cancel_order,
     list_orders,
     update_order_status,
+    order_history,
+    customer_order_detail,
+    customer_cancel_order,
 )
 
 urlpatterns = [
@@ -31,5 +34,20 @@ urlpatterns = [
         '<int:order_id>/status/',
         update_order_status,
         name='update-order-status'
+    ),
+    path(
+        'history/',
+        order_history,
+        name='order-history'
+    ),
+    path(
+        '<int:order_id>/',
+        customer_order_detail,
+        name='customer-order-detail'
+    ),
+    path(
+        '<int:order_id>/customer-cancel/',
+        customer_cancel_order,
+        name='customer-cancel-order'
     ),
 ]

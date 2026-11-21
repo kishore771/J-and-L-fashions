@@ -1,0 +1,328 @@
+
+/* ==========================================
+   J&L FASHIONS
+   PREMIUM MY ORDERS PAGE
+========================================== */
+
+.my-orders-page {
+  min-height: 100vh;
+  background: #faf8f3;
+  color: #29251f;
+}
+
+.my-orders-page *,
+.my-orders-page *::before,
+.my-orders-page *::after {
+  box-sizing: border-box;
+}
+
+.my-orders-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 5% 75px;
+}
+
+/* ==========================================
+   PAGE HEADER
+========================================== */
+
+.my-orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.my-orders-eyebrow {
+  margin: 0 0 12px;
+  color: #a67c52;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.my-orders-header h1 {
+  margin: 0 0 12px;
+  color: #29251f;
+  font-family: Georgia, serif;
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.my-orders-subtitle {
+  margin: 0;
+  color: #77716a;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.my-orders-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+
+  padding: 12px 18px;
+
+  background: #ffffff;
+  color: #0b4930;
+
+  border: 1px solid #d6e3d8;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.my-orders-back:hover {
+  background: #edf5ef;
+  border-color: #a9c7b0;
+}
+
+/* ==========================================
+   METALLIC EMERALD BANNER
+========================================== */
+
+.my-orders-banner {
+  position: relative;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  min-height: 175px;
+  padding: 35px 40px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(0, 0, 0, 0.12)
+    ),
+    linear-gradient(
+      135deg,
+      #062b1c 0%,
+      #0b4930 28%,
+      #176b48 48%,
+      #247d56 55%,
+      #0b4930 78%,
+      #052719 100%
+    );
+
+  box-shadow:
+    0 10px 28px rgba(6, 43, 28, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.my-orders-banner::after {
+  content: "";
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  right: -80px;
+  top: -140px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.my-orders-banner-icon {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 72px;
+  height: 72px;
+
+  border: 1px solid rgba(230, 201, 142, 0.6);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.1);
+  color: #e6c98e;
+}
+
+.my-orders-banner-content {
+  position: relative;
+  z-index: 1;
+}
+
+.my-orders-banner-content span {
+  display: block;
+  margin-bottom: 9px;
+
+  color: #e6c98e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.my-orders-banner-content h2 {
+  margin: 0 0 9px;
+
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 29px;
+  font-weight: 500;
+}
+
+.my-orders-banner-content p {
+  max-width: 450px;
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.my-orders-banner-brand {
+  position: relative;
+  z-index: 1;
+
+  margin-left: auto;
+  padding-right: 15px;
+
+  color: rgba(230, 201, 142, 0.65);
+  font-family: Georgia, serif;
+  font-size: 54px;
+  letter-spacing: 3px;
+}
+
+/* ==========================================
+   ORDER HISTORY SECTION
+========================================== */
+
+.my-orders-history {
+  margin-top: 42px;
+}
+
+.my-orders-section-heading {
+  margin-bottom: 25px;
+}
+
+.my-orders-section-heading h2 {
+  margin: 0 0 9px;
+
+  color: #29251f;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.my-orders-section-heading > div > p:last-child {
+  margin: 0;
+  color: #77716a;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 900px) {
+  .my-orders-container {
+    padding: 38px 4% 60px;
+  }
+
+  .my-orders-banner-brand {
+    display: none;
+  }
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 600px) {
+  .my-orders-container {
+    padding: 28px 5% 45px;
+  }
+
+  .my-orders-header {
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .my-orders-header h1 {
+    font-size: 32px;
+  }
+
+  .my-orders-subtitle {
+    font-size: 12px;
+  }
+
+  .my-orders-back {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .my-orders-banner {
+    align-items: flex-start;
+    gap: 16px;
+    min-height: auto;
+    padding: 25px 20px;
+  }
+
+  .my-orders-banner-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .my-orders-banner-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .my-orders-banner-content h2 {
+    font-size: 23px;
+  }
+
+  .my-orders-banner-content p {
+    font-size: 12px;
+  }
+
+  .my-orders-history {
+    margin-top: 35px;
+  }
+
+  .my-orders-section-heading h2 {
+    font-size: 27px;
+  }
+}
+
+@media (max-width: 420px) {
+  .my-orders-header {
+    flex-direction: column;
+  }
+
+  .my-orders-back {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .my-orders-back {
+    transition: none;
+  }
+}

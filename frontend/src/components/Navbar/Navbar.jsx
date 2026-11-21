@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -66,9 +68,22 @@ const Navbar = () => {
        <div className="navbar-icons">
 
 
-  <Link to="/wishlist" className="navbar-icon">
-    <Heart />
-  </Link>
+  <Link
+  to="/wishlist"
+  className="navbar-icon navbar-wishlist"
+  aria-label={`Wishlist with ${wishlistCount} saved ${
+    wishlistCount === 1 ? 'product' : 'products'
+  }`}
+  title="My Wishlist"
+>
+  <Heart size={24} strokeWidth={1.8} />
+
+  {wishlistCount > 0 && (
+    <span className="wishlist-nav-count">
+      {wishlistCount > 99 ? '99+' : wishlistCount}
+    </span>
+  )}
+</Link>
 
     <Link
     to="/cart"
@@ -105,6 +120,9 @@ const Navbar = () => {
   <NavLink to="/accessories">Accessories</NavLink>
   <NavLink to="/about">About</NavLink>
   <NavLink to="/contact">Contact</NavLink>
+  <NavLink to="/my-orders">
+    My Orders
+  </NavLink>
 </div>
 
     </nav>

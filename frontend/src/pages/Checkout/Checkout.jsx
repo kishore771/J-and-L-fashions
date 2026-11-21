@@ -1,8 +1,17 @@
 import { Link } from 'react-router';
-import { ShoppingCart, LockKeyhole } from 'lucide-react';
+import {
+  ShoppingCart,
+  LockKeyhole,
+  CheckCircle2,
+  PackageCheck,
+  CreditCard,
+  ArrowRight,
+  ShoppingBag,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
+
 
 import {
   getCheckoutAttempt,
@@ -55,33 +64,79 @@ useEffect(() => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [pendingOrder, setPendingOrder] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem(
-        'jl_confirmed_cod_order'
-      );
+ const [pendingOrder, setPendingOrder] = useState(() => {
+  try {
+    const saved = sessionStorage.getItem(
+      'jl_confirmed_cod_order'
+    );
 
-      const confirmed = saved ? JSON.parse(saved) : null;
+    const confirmed = saved ? JSON.parse(saved) : null;
 
-      if (
-        !confirmed?.order_id ||
-        !confirmed?.idempotency_key
-      ) {
-        return null;
-      }
-
-      const attempt = JSON.parse(
-        sessionStorage.getItem('jl_checkout_attempt') ||
-          'null'
-      );
-
-      return attempt?.key === confirmed.idempotency_key
-        ? confirmed
-        : null;
-    } catch {
+    if (
+      !confirmed?.order_id ||
+      !confirmed?.idempotency_key
+    ) {
       return null;
     }
-  });
+
+    const attempt = JSON.parse(
+      sessionStorage.getItem('jl_checkout_attempt') ||
+        'null'
+    );
+
+    if (attempt?.key !== confirmed.idempotency_key) {
+      return null;
+    }
+
+    // A non-empty cart indicates the customer has
+    // started shopping again.
+    const savedCart = JSON.parse(
+      localStorage.getItem('jl_fashions_cart') || '[]'
+    );
+
+    if (Array.isArray(savedCart) && savedCart.length > 0) {
+      return null;
+    }
+
+    return confirmed;
+  } catch {
+    return null;
+  }
+});
+
+useEffect(() => {
+  if (cartItems.length === 0 || pendingOrder) {
+    return;
+  }
+
+  const savedConfirmation = sessionStorage.getItem(
+    'jl_confirmed_cod_order'
+  );
+
+  if (!savedConfirmation) {
+    return;
+  }
+
+  try {
+    const confirmed = JSON.parse(savedConfirmation);
+
+    const attempt = JSON.parse(
+      sessionStorage.getItem('jl_checkout_attempt') ||
+        'null'
+    );
+
+    if (
+      confirmed?.idempotency_key &&
+      attempt?.key === confirmed.idempotency_key
+    ) {
+      clearCheckoutAttempt();
+    }
+  } catch {
+    // Ignore invalid stored confirmation data.
+  }
+
+  sessionStorage.removeItem('jl_confirmed_cod_order');
+}, [cartItems, pendingOrder]);
 
   // Format currency in Indian Rupees
   const formatPrice = (amount) =>
@@ -247,13 +302,17 @@ const response = await fetch('/api/orders/checkout/', {
       };
 
       sessionStorage.setItem(
-        'jl_confirmed_cod_order',
-        JSON.stringify(confirmedOrder)
-      );
+          'jl_confirmed_cod_order',
+          JSON.stringify(confirmedOrder)
+        );
 
-      setPendingOrder(confirmedOrder);
+        // Clear the cart only after Django confirms the order.
+        clearCart();
 
-      console.log('COD order confirmed:', confirmedOrder);
+        // Display the order confirmation screen.
+        setPendingOrder(confirmedOrder);
+
+        console.log('COD order confirmed:', confirmedOrder);
 
     } catch (error) {
       console.error('Checkout error:', error);
@@ -271,69 +330,133 @@ const response = await fetch('/api/orders/checkout/', {
 
   // Start a completely new shopping order
   const handleStartNewOrder = () => {
-    clearCheckoutAttempt();
+  clearCheckoutAttempt();
 
-    sessionStorage.removeItem(
-      'jl_confirmed_cod_order'
-    );
+  sessionStorage.removeItem(
+    'jl_confirmed_cod_order'
+  );
 
-    clearCart();
+  setPendingOrder(null);
+  setErrors({});
+  setFormData({ ...initialFormData });
+};
+  // ==========================================
+// 2. EMPTY CART SCREEN
+// ==========================================
 
-    setPendingOrder(null);
-    setErrors({});
-    setFormData({ ...initialFormData });
-  };
+if (pendingOrder) {
+  return (
+    <section className="checkout-page">
+      <div className="checkout-order-success">
 
-  if (pendingOrder) {
-    return (
-      <section className="checkout-page">
-        <div className="checkout-order-success">
-          <h1>Order Confirmed!</h1>
+        <div className="checkout-success-icon">
+          <CheckCircle2 size={42} strokeWidth={1.5} />
+        </div>
 
-          <p>
-            Thank you for shopping with J&L Fashions.
-          </p>
+        <p className="checkout-success-eyebrow">
+          J&L FASHIONS
+        </p>
 
-          <h3>
-            Order #{pendingOrder.order_id}
-          </h3>
+        <h1>Order Confirmed</h1>
 
-          <p>
-            <strong>Order Status:</strong>{' '}
-            {pendingOrder.status}
-          </p>
+        <p className="checkout-success-message">
+          Thank you for shopping with J&L Fashions.
+          Your order has been successfully placed.
+        </p>
 
-          <p>
-            <strong>Payment Method:</strong>{' '}
-            Cash on Delivery
-          </p>
+        <div className="checkout-success-order-number">
+          <span>YOUR ORDER NUMBER</span>
 
-          <p>
-            <strong>Payment Status:</strong>{' '}
-            Pending
-          </p>
+          <strong>
+            #{pendingOrder.order_id}
+          </strong>
+        </div>
 
-          <p>
-            <strong>Total Amount:</strong>{' '}
+        <div className="checkout-success-details">
+
+          <div className="checkout-success-detail">
+            <div className="checkout-success-detail-icon">
+              <PackageCheck size={20} />
+            </div>
+
+            <div>
+              <span>Order Status</span>
+              <strong>
+                {pendingOrder.status || 'Confirmed'}
+              </strong>
+            </div>
+          </div>
+
+          <div className="checkout-success-detail">
+            <div className="checkout-success-detail-icon">
+              <CreditCard size={20} />
+            </div>
+
+            <div>
+              <span>Payment Method</span>
+              <strong>Cash on Delivery</strong>
+            </div>
+          </div>
+
+          <div className="checkout-success-detail">
+            <div className="checkout-success-detail-icon">
+              <LockKeyhole size={20} />
+            </div>
+
+            <div>
+              <span>Payment Status</span>
+              <strong>Pending</strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="checkout-success-total">
+          <span>Order Total</span>
+
+          <strong>
             {formatPrice(pendingOrder.total_amount)}
-          </p>
+          </strong>
+        </div>
 
-          <p>
-            Please keep the payment ready when your
-            order is delivered.
-          </p>
+        <p className="checkout-success-reminder">
+          Please keep the payment ready when your
+          order is delivered.
+        </p>
+
+        <div className="checkout-success-actions">
+
+          <Link
+            to={`/my-orders/${pendingOrder.order_id}`}
+            className="checkout-button checkout-view-order"
+          >
+            View Order
+            <ArrowRight size={17} />
+          </Link>
 
           <button
             type="button"
-            className="checkout-button"
+            className="checkout-button checkout-new-order"
             onClick={handleStartNewOrder}
           >
+            <ShoppingBag size={17} />
             Start New Order
           </button>
+
         </div>
-      </section>
-    );
-  }
+
+        <Link
+          to="/collections"
+          className="checkout-success-shopping-link"
+        >
+          Continue Browsing Collections
+        </Link>
+
+      </div>
+    </section>
+  );
+}
+
 
   // ==========================================
   // 2. EMPTY CART SCREEN

@@ -1,6 +1,5 @@
+
 from django.urls import path
-
-
 
 from .views import (
     register_customer,
@@ -11,11 +10,53 @@ from .views import (
     customer_csrf,
 )
 
+from .wishlist_views import (
+    CustomerWishlistView,
+    CustomerWishlistDeleteView,
+)
+
+
 urlpatterns = [
-    path('register/', register_customer, name='customer-register'),
-    path('login/', login_customer, name='customer-login'),
-    path('profile/', customer_profile, name='customer-profile'),
-    path('orders/', customer_order_history, name='customer-order-history'),
-    path('csrf/', customer_csrf, name='customer-csrf'),
-    path('logout/', logout_customer, name='customer-logout'),
+    path(
+        'register/',
+        register_customer,
+        name='customer-register',
+    ),
+    path(
+        'login/',
+        login_customer,
+        name='customer-login',
+    ),
+    path(
+        'profile/',
+        customer_profile,
+        name='customer-profile',
+    ),
+    path(
+        'orders/',
+        customer_order_history,
+        name='customer-order-history',
+    ),
+    path(
+        'csrf/',
+        customer_csrf,
+        name='customer-csrf',
+    ),
+    path(
+        'logout/',
+        logout_customer,
+        name='customer-logout',
+    ),
+
+    # Wishlist
+    path(
+        'wishlist/',
+        CustomerWishlistView.as_view(),
+        name='customer-wishlist',
+    ),
+    path(
+        'wishlist/<int:product_id>/',
+        CustomerWishlistDeleteView.as_view(),
+        name='customer-wishlist-delete',
+    ),
 ]

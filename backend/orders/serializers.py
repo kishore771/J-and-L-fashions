@@ -101,3 +101,23 @@ class OrderManagementSerializer(serializers.ModelSerializer):
             'items',
         ]
         read_only_fields = fields
+
+class CustomerOrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'full_name',
+            'subtotal',
+            'shipping_charge',
+            'total_amount',
+            'status',
+            'payment_method',
+            'payment_status',
+            'created_at',
+            'updated_at',
+            'items',
+        ]
+        read_only_fields = fields

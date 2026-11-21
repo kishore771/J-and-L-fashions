@@ -1,49 +1,262 @@
 
+/* ==========================================
+   J&L FASHIONS
+   PREMIUM SUBCATEGORY TABS
+========================================== */
+
+.subcategory-section {
+  width: 100%;
+  min-width: 0;
+
+  margin-bottom: 28px;
+  padding: 0 0 24px;
+
+  border-bottom: 1px solid #e7e1d6;
+}
+
+.subcategory-section *,
+.subcategory-section *::before,
+.subcategory-section *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   SECTION HEADER
+========================================== */
+
+.subcategory-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 17px;
+}
+
+.subcategory-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #0b4930;
+
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.subcategory-section-title svg {
+  color: #b38b52;
+}
+
+/* ==========================================
+   SCROLL CONTROLS
+========================================== */
+
+.subcategory-scroll-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subcategory-scroll-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  background: #ffffff;
+  color: #0b4930;
+
+  border: 1px solid #ded7cb;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.subcategory-scroll-controls button:hover {
+  background: #edf5ef;
+  border-color: #c6a46a;
+}
+
+/* ==========================================
+   SCROLLABLE TABS
+========================================== */
+
 .subcategory-tabs {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+
   width: 100%;
+  min-width: 0;
+
   overflow-x: auto;
-  padding: 12px 0 18px;
+  overflow-y: hidden;
+
+  padding: 3px 1px 10px;
+
   scrollbar-width: thin;
+  scrollbar-color: #c6a46a transparent;
+
+  scroll-behavior: smooth;
 }
 
+.subcategory-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.subcategory-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.subcategory-tabs::-webkit-scrollbar-thumb {
+  background: #c6a46a;
+  border-radius: 10px;
+}
+
+/* ==========================================
+   INDIVIDUAL TABS
+========================================== */
+
 .subcategory-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
   flex-shrink: 0;
+
+  min-height: 42px;
   padding: 10px 20px;
-  border: 1px solid #ded9d0;
+
+  background: #ffffff;
+  color: #514b43;
+
+  border: 1px solid #ded7cb;
   border-radius: 24px;
-  background: #fff;
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .subcategory-tab:hover {
-  background: #f2f2f2;
+  background: #edf5ef;
+  color: #0b4930;
+  border-color: #a9c7b0;
 }
+
+/* ACTIVE TAB */
 
 .subcategory-tab.active {
-  background: #222;
-  color: #fff;
-  border-color: #222;
+  background:
+    linear-gradient(
+      125deg,
+      #062b1c,
+      #176b48 60%,
+      #0b4930
+    );
+
+  color: #ffffff;
+
+  border-color: #0b4930;
+
+  box-shadow:
+    0 4px 12px rgba(11, 73, 48, 0.16);
 }
 
-.subcategory-tab:focus-visible {
-  outline: 2px solid #333;
+.subcategory-tab.active:hover {
+  color: #ffffff;
+}
+
+/* ==========================================
+   KEYBOARD ACCESSIBILITY
+========================================== */
+
+.subcategory-tab:focus-visible,
+.subcategory-scroll-controls button:focus-visible {
+  outline: 2px solid #c6a46a;
   outline-offset: 3px;
 }
 
-@media (max-width: 768px) {
-  .subcategory-tabs {
-    gap: 8px;
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 900px) {
+  .subcategory-section {
+    margin-bottom: 23px;
+    padding-bottom: 20px;
   }
 
   .subcategory-tab {
+    padding: 10px 17px;
+  }
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 650px) {
+  .subcategory-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .subcategory-section-header {
+    margin-bottom: 13px;
+  }
+
+  .subcategory-section-title {
+    font-size: 15px;
+  }
+
+  .subcategory-scroll-controls button {
+    width: 29px;
+    height: 29px;
+  }
+
+  .subcategory-tabs {
+    gap: 8px;
+    padding-bottom: 9px;
+  }
+
+  .subcategory-tab {
+    min-height: 38px;
     padding: 9px 15px;
-    font-size: 13px;
+
+    font-size: 11px;
+  }
+}
+
+/* ==========================================
+   REDUCED MOTION
+========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .subcategory-tabs {
+    scroll-behavior: auto;
+  }
+
+  .subcategory-tab,
+  .subcategory-scroll-controls button {
+    transition: none;
   }
 }

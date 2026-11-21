@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from .models import Order
 import uuid
+import hashlib
+from django.urls import reverse
 
 from products.models import (
     Department,
@@ -486,3 +488,218 @@ class CheckoutCSRFTests(APITestCase):
 
         self.assertEqual(variant.stock, 8)
         self.assertEqual(Order.objects.count(), 1)
+
+class CustomerOrderSecurityTests(APITestCase):
+
+    def setUp(self):
+        User = get_user_model()
+
+        self.customer1 = User.objects.create_user(
+            username='customer1',
+            password='TestPassword123!'
+        )
+
+        self.customer2 = User.objects.create_user(
+            username='customer2',
+            password='TestPassword123!'
+        )
+
+        self.staff = User.objects.create_user(
+            username='staff_security',
+            password='TestPassword123!',
+            is_staff=True
+        )
+
+        self.order1 = self.create_order(
+            customer=self.customer1,
+            name='Customer One'
+        )
+
+        self.order2 = self.create_order(
+            customer=self.customer2,
+            name='Customer Two'
+        )
+
+        self.guest_id = 'test-guest-session-123'
+
+        self.guest_hash = hashlib.sha256(
+            self.guest_id.encode('utf-8')
+        ).hexdigest()
+
+        self.guest_order = self.create_order(
+            customer=None,
+            name='Guest Customer',
+            guest_session_hash=self.guest_hash
+        )
+
+    def create_order(
+        self,
+        customer,
+        name,
+        guest_session_hash=None
+    ):
+        return Order.objects.create(
+            customer=customer,
+            guest_session_hash=guest_session_hash,
+            full_name=name,
+            email='test@example.com',
+            phone='9999999999',
+            address='Test Address',
+            city='Hyderabad',
+            state='Telangana',
+            pincode='500001',
+            subtotal=Decimal('500.00'),
+            shipping_charge=Decimal('0.00'),
+            total_amount=Decimal('500.00'),
+            status='confirmed',
+            payment_method='cod',
+            payment_status='pending'
+        )
+
+    def set_guest_session(self, guest_id):
+        session = self.client.session
+        session['guest_checkout_id'] = guest_id
+        session.save()
+
+    def test_customer_sees_only_own_history(self):
+        self.client.force_authenticate(
+            user=self.customer1
+        )
+
+        response = self.client.get(
+            reverse('order-history')
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        ids = [
+            order['id']
+            for order in response.data['orders']
+        ]
+
+        self.assertIn(self.order1.id, ids)
+        self.assertNotIn(self.order2.id, ids)
+        self.assertNotIn(self.guest_order.id, ids)
+
+    def test_customer_cannot_view_other_customer_order(self):
+        self.client.force_authenticate(
+            user=self.customer1
+        )
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.order2.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_customer_can_view_own_order(self):
+        self.client.force_authenticate(
+            user=self.customer1
+        )
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.order1.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data['id'],
+            self.order1.id
+        )
+
+    def test_guest_can_view_own_order(self):
+        self.set_guest_session(self.guest_id)
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.guest_order.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_guest_cannot_view_other_guest_order(self):
+        self.set_guest_session('different-guest-session')
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.guest_order.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_guest_without_session_cannot_view_order(self):
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.guest_order.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_guest_without_session_gets_empty_history(self):
+        response = self.client.get(
+            reverse('order-history')
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data['orders'],
+            []
+        )
+
+        self.assertNotIn(
+            'guest_checkout_id',
+            self.client.session
+        )
+
+    def test_customer_cannot_access_admin_orders(self):
+        self.client.force_authenticate(
+            user=self.customer1
+        )
+
+        response = self.client.get(
+            reverse('list-orders')
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_authenticated_customer_cannot_view_guest_order(self):
+        self.set_guest_session(self.guest_id)
+
+        self.client.force_authenticate(
+            user=self.customer1
+        )
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.guest_order.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_staff_cannot_view_registered_customer_order(self):
+        self.client.force_authenticate(
+            user=self.staff
+        )
+
+        response = self.client.get(
+            reverse(
+                'customer-order-detail',
+                args=[self.order1.id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
